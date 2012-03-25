@@ -16,30 +16,69 @@ clock = pygame.time.Clock()
 
 #Set up touchpy stuff
 t = touchpy()
+
+#Initialize pygame
+pygame.init()
+
 sz = utils.get_sz()
-pos = []
+
+#keeps track of mouse or blob coordinates (x and y) and whether a blob has been touched down or the mouse1 has been pressed
+pos = [0, 0, 0]
 size = 100
 blist = []
 
-mouse = [0, 0, 0]
 mouseO = [0, 0, 0]
 
-images = ((pygame.image.load("spaceship2.png")), (pygame.image.load("spaceship2.png")))
+class Observer(object):
+    def __init__(self, subject):
+        subject.push_handlers(self)
+        
+class touch_up(Observer):
+    def TOUCH_UP(self,blobID, xpos, ypos):
+        x = int(round(t.blobs[blobID].xpos * sd[0]))
+        y = int(round(t.blobs[blobID].ypos * sd[1]))
+        ship.MOVING = False
+        pos[2] = 0
+
+class touch_down(Observer):
+    def TOUCH_DOWN(self,blobID):
+        x = int(round(t.blobs[blobID].xpos * sd[0]))
+        y = int(round(t.blobs[blobID].ypos * sd[1]))
+        pos[2] = 1
+
+class touch_move(Observer):
+    def TOUCH_MOVE(self,blobID):
+        posx = int(round(t.blobs[blobID].xpos * sd[0]))
+        posy = int(round(t.blobs[blobID].ypos * sd[1]))
+        shipx = ship.rect.centerx
+        shipy = ship.rect.centery
+        moveVector = (posx - shipx, posy - shipy)
+        degrees = (math.degrees(\
+                math.atan2(-1*moveVector[0], -1*moveVector[1])))
+        ship.turn(degrees)
+        ship.MOVING = True
+        #boxes.update(pygame.time.get_ticks(), (posx, posy))
+        pos[0] = posx
+        pos[1] = posy
+
+tu = touch_up(t)
+td = touch_down(t)
+tm = touch_move(t)
+
+images = (pygame.image.load("spaceship1.png"), pygame.image.load("spaceship2.png"), pygame.image.load("spaceship3.png"))
 
 class ShipSprite(AnimatedSprite, pygame.sprite.Sprite):
     image = None
 
     def __init__(self, initial_pos, mouse, sd):
-        AnimatedSprite.__init__(self, images, mouse)
+        AnimatedSprite.__init__(self, images, pos)
 
         self.rect = self.image.get_rect()
         self.rect.bottomleft = initial_pos
 
-pygame.init()
-
 boxes = RenderUpdates()
 
-ship = ShipSprite([sd[0]/2,sd[1]/2], mouse, sd)
+ship = ShipSprite([sd[0]/2,sd[1]/2], pos, sd)
 
 for location in [[sd[0]/2, sd[1]/2]]:
    boxes.add(ship)
@@ -50,20 +89,21 @@ background = pygame.image.load("background.png")
 screen.blit(background, (0,0))
 pygame.display.update()
 while True:
+    t.update()
     #screen.fill([100,0,0])
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and \
                                              event.key == pygame.K_ESCAPE):
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse[2] = 1
-            mouse[0] = event.pos[0]
-            mouse[1] = event.pos[1]
+            pos[2] = 1
+            pos[0] = event.pos[0]
+            pos[1] = event.pos[1]
 
             x = ship.rect.centerx
             y = ship.rect.centery
 
-            moveVector = (mouse[0]-x, mouse[1]-y)
+            moveVector = (pos[0]-x, pos[1]-y)
             degrees = (math.degrees(\
                     math.atan2(-1*moveVector[0], -1*moveVector[1])))
 
@@ -71,17 +111,17 @@ while True:
             ship.MOVING = True
 
         if event.type == pygame.MOUSEBUTTONUP:
-            mouse[2] = 0
+            pos[2] = 0
             ship.MOVING = False
 
-        elif event.type == pygame.MOUSEMOTION and mouse[2] == 1:
-            mouse[0] = event.pos[0]
-            mouse[1] = event.pos[1]
+        elif event.type == pygame.MOUSEMOTION and pos[2] == 1:
+            pos[0] = event.pos[0]
+            pos[1] = event.pos[1]
 
             x = ship.rect.centerx
             y = ship.rect.centery
 
-            moveVector = (mouse[0]-x, mouse[1]-y)
+            moveVector = (pos[0]-x, pos[1]-y)
             degrees = (math.degrees(\
                     math.atan2(-1*moveVector[0], -1*moveVector[1])))
 
@@ -93,15 +133,10 @@ while True:
             elif event.key == pygame.K_RIGHT:
                 ship.turn(-10)
 
-    mouseO[0] = mouse[0]
-    mouseO[1] = mouse[1] + 23
-    mouseO[2] = mouse[2]
-
-    boxes.update(pygame.time.get_ticks(), mouse)
+    boxes.update(pygame.time.get_ticks(), pos)
     rectlist = boxes.draw(screen)
     pygame.display.update(rectlist)
     clock.tick(50)
     boxes.clear(screen, background)
-
 
     #pygame.display.flip()

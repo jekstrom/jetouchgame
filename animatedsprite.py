@@ -33,10 +33,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
             if self._frame >= len(self._images):
                 self._frame = 0
             self.image = self._images[self._frame]
+            self.originalImage = self.image
             self._last_update = t
 
         if self.rotation:
-            self.image = pygame.transform.rotate(self.originalImage.copy(),\
+            self.image = pygame.transform.rotate(self.originalImage,\
                                          (self.rotation))
             self.rect.size = self.image.get_rect().size
 
