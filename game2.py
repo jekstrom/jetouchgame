@@ -10,7 +10,7 @@ from oru import *
 from animatedsprite import *
 
 #Screen dimensions
-sd = (640, 480)
+sd = (800, 600)
 
 clock = pygame.time.Clock()
 
