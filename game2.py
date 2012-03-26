@@ -86,21 +86,35 @@ class BombSprite(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.bottomleft = initial_pos
+        self.originalImage = self.image.copy()
+    
+    def update(self, rotation):
+        self.rect.centerx += 1
+        self.image = pygame.transform.rotate(self.originalImage, rotation)
+        self.rect.size = self.image.get_rect().size
 
 boxes = RenderUpdates()
 
+bombs = RenderUpdates()
+
 ship = ShipSprite([sd[0]/2,sd[1]/2], pos, sd)
-bombs = BombSprite([sd[0]/2,sd[1]/2], sd)
+
 
 for location in [[sd[0]/2, sd[1]/2]]:
    boxes.add(ship)
-   boxes.add(bombs)
+
+for y in range (0, sd[1] + 50, 50):
+    for location in [[0, y]]:
+        print "adding bomb to location ", location
+        bomb = BombSprite(location, sd)
+        bombs.add(bomb)
 
 screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
 background = pygame.image.load("background.jpg")
 
 screen.blit(background, (0,0))
 pygame.display.update()
+i=0
 while True:
     t.update()
     #screen.fill([100,0,0])
@@ -147,9 +161,16 @@ while True:
                 ship.turn(-10)
 
     boxes.update(pygame.time.get_ticks(), pos)
+    i += 1
+    if (i >= 360):
+        i = 0
+    bombs.update(i)
     rectlist = boxes.draw(screen)
+    rectlist2 = bombs.draw(screen)
     pygame.display.update(rectlist)
+    pygame.display.update(rectlist2)
     clock.tick(50)
     boxes.clear(screen, background)
+    bombs.clear(screen, background)
 
     #pygame.display.flip()
