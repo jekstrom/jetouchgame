@@ -7,7 +7,7 @@ from pygame.locals import KEYDOWN
 import utils
 from dirty import *
 from oru import *
-from animatedsprite import *
+from animatedshipsprite import *
 
 #Screen dimensions
 sd = (800, 600)
@@ -67,11 +67,22 @@ tm = touch_move(t)
 
 images = (pygame.image.load("spaceship1.png"), pygame.image.load("spaceship2.png"), pygame.image.load("spaceship3.png"))
 
-class ShipSprite(AnimatedSprite, pygame.sprite.Sprite):
+class ShipSprite(AnimatedShipSprite, pygame.sprite.Sprite):
     image = None
 
     def __init__(self, initial_pos, mouse, sd):
-        AnimatedSprite.__init__(self, images, pos)
+        AnimatedShipSprite.__init__(self, images, pos)
+
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = initial_pos
+
+bombImage = (pygame.image.load("bomb.png"))
+
+class BombSprite(pygame.sprite.Sprite):
+    image = bombImage
+    
+    def __init__(self, initial_pos, sd):
+        pygame.sprite.Sprite.__init__(self)
 
         self.rect = self.image.get_rect()
         self.rect.bottomleft = initial_pos
@@ -79,12 +90,14 @@ class ShipSprite(AnimatedSprite, pygame.sprite.Sprite):
 boxes = RenderUpdates()
 
 ship = ShipSprite([sd[0]/2,sd[1]/2], pos, sd)
+bombs = BombSprite([sd[0]/2,sd[1]/2], sd)
 
 for location in [[sd[0]/2, sd[1]/2]]:
    boxes.add(ship)
+   boxes.add(bombs)
 
 screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
-background = pygame.image.load("background.png")
+background = pygame.image.load("background.jpg")
 
 screen.blit(background, (0,0))
 pygame.display.update()
