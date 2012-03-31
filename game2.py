@@ -87,18 +87,20 @@ class BombSprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = initial_pos
         self.originalImage = self.image.copy()
+        self.sd = sd
     
     def update(self, rotation):
         self.rect.centerx += 1
         self.image = pygame.transform.rotate(self.originalImage, rotation)
         self.rect.size = self.image.get_rect().size
+        if self.rect.centerx == self.sd[0]:
+            self.rect.centerx = 0
 
 boxes = RenderUpdates()
 
 bombs = RenderUpdates()
 
 ship = ShipSprite([sd[0]/2,sd[1]/2], pos, sd)
-
 
 for location in [[sd[0]/2, sd[1]/2]]:
    boxes.add(ship)
