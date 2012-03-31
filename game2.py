@@ -40,15 +40,16 @@ class touch_up(Observer):
         ship.MOVING = False
         pos[2] = 0
 
+lasers = RenderUpdates()
+
 class touch_down(Observer):
     def TOUCH_DOWN(self,blobID):
         if pos[2] == 1:
-            #Already have a blob touch-down somewhere
+            #Already have a blob touch-down somewhere driving the ship
             #Get pos of this blob
             x = int(round(t.blobs[blobID].xpos * sd[0]))
             y = int(round(t.blobs[blobID].ypos * sd[1]))
             laser = LaserSprite([x,y], sd)
-            lasers = RenderUpdates()
             lasers.add(laser)
         x = int(round(t.blobs[blobID].xpos * sd[0]))
         y = int(round(t.blobs[blobID].ypos * sd[1]))
@@ -104,7 +105,7 @@ class BombSprite(pygame.sprite.Sprite):
         if self.rect.centerx == self.sd[0]:
             self.rect.centerx = 0
 
-laserImage = (pygame.image.load("laser1.png"))
+laserImage = (pygame.image.load("laser2.png"))
 
 class LaserSprite(pygame.sprite.Sprite):
     image = laserImage
@@ -117,7 +118,7 @@ class LaserSprite(pygame.sprite.Sprite):
         self.originalImage = self.image.copy()
         self.sd = sd
     
-    def update(self, rotation):
+    def update(self):
         self.rect.centerx = sd[0]/2
         self.rect.centery = sd[1]/2
                               
@@ -192,12 +193,16 @@ while True:
     if (i >= 360):
         i = 0
     bombs.update(i)
+    lasers.update()
     rectlist = boxes.draw(screen)
     rectlist2 = bombs.draw(screen)
+    rectlist3 = lasers.draw(screen)
     pygame.display.update(rectlist)
     pygame.display.update(rectlist2)
+    pygame.display.update(rectlist3)
     clock.tick(50)
     boxes.clear(screen, background)
     bombs.clear(screen, background)
+    lasers.clear(screen, background)
 
     #pygame.display.flip()
