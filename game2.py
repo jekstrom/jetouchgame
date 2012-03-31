@@ -42,6 +42,14 @@ class touch_up(Observer):
 
 class touch_down(Observer):
     def TOUCH_DOWN(self,blobID):
+        if pos[2] == 1:
+            #Already have a blob touch-down somewhere
+            #Get pos of this blob
+            x = int(round(t.blobs[blobID].xpos * sd[0]))
+            y = int(round(t.blobs[blobID].ypos * sd[1]))
+            laser = LaserSprite([x,y], sd)
+            lasers = RenderUpdates()
+            lasers.add(laser)
         x = int(round(t.blobs[blobID].xpos * sd[0]))
         y = int(round(t.blobs[blobID].ypos * sd[1]))
         pos[2] = 1
@@ -96,6 +104,24 @@ class BombSprite(pygame.sprite.Sprite):
         if self.rect.centerx == self.sd[0]:
             self.rect.centerx = 0
 
+laserImage = (pygame.image.load("laser1.png"))
+
+class LaserSprite(pygame.sprite.Sprite):
+    image = laserImage
+
+    def __init__(self, initial_pos, sd):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = initial_pos
+        self.originalImage = self.image.copy()
+        self.sd = sd
+    
+    def update(self, rotation):
+        self.rect.centerx = sd[0]/2
+        self.rect.centery = sd[1]/2
+                              
+
 boxes = RenderUpdates()
 
 bombs = RenderUpdates()
@@ -107,7 +133,6 @@ for location in [[sd[0]/2, sd[1]/2]]:
 
 for y in range (0, sd[1] + 50, 50):
     for location in [[0, y]]:
-        print "adding bomb to location ", location
         bomb = BombSprite(location, sd)
         bombs.add(bomb)
 
