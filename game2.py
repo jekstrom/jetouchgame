@@ -29,10 +29,26 @@ blist = []
 
 mouseO = [0, 0, 0]
 
+images = (pygame.image.load("spaceship1.png"), pygame.image.load("spaceship2.png"), pygame.image.load("spaceship3.png"))
+
+class ShipSprite(AnimatedShipSprite, pygame.sprite.Sprite):
+    image = None
+
+    def __init__(self, initial_pos, mouse, sd):
+        AnimatedShipSprite.__init__(self, images, pos)
+
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = initial_pos
+
+ship = ShipSprite([sd[0]/2,sd[1]/2], pos, sd)
+
 class Observer(object):
     def __init__(self, subject):
         subject.push_handlers(self)
-        
+
+laser_pos = [0,0]
+shoot_laser = False
+
 class touch_up(Observer):
     def TOUCH_UP(self,blobID, xpos, ypos):
         x = int(round(t.blobs[blobID].xpos * sd[0]))
@@ -40,7 +56,7 @@ class touch_up(Observer):
         ship.MOVING = False
         pos[2] = 0
 
-lasers = RenderUpdates()
+
 
 class touch_down(Observer):
     def TOUCH_DOWN(self,blobID):
@@ -49,8 +65,9 @@ class touch_down(Observer):
             #Get pos of this blob
             x = int(round(t.blobs[blobID].xpos * sd[0]))
             y = int(round(t.blobs[blobID].ypos * sd[1]))
-            laser = LaserSprite([x,y], sd)
-            lasers.add(laser)
+            laser_pos[0] = x
+            laser_pos[1] = y
+
         x = int(round(t.blobs[blobID].xpos * sd[0]))
         y = int(round(t.blobs[blobID].ypos * sd[1]))
         pos[2] = 1
@@ -73,18 +90,7 @@ class touch_move(Observer):
 tu = touch_up(t)
 td = touch_down(t)
 tm = touch_move(t)
-
-images = (pygame.image.load("spaceship1.png"), pygame.image.load("spaceship2.png"), pygame.image.load("spaceship3.png"))
-
-class ShipSprite(AnimatedShipSprite, pygame.sprite.Sprite):
-    image = None
-
-    def __init__(self, initial_pos, mouse, sd):
-        AnimatedShipSprite.__init__(self, images, pos)
-
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = initial_pos
-
+       
 bombImage = (pygame.image.load("bomb.png"))
 
 class BombSprite(pygame.sprite.Sprite):
@@ -105,29 +111,9 @@ class BombSprite(pygame.sprite.Sprite):
         if self.rect.centerx == self.sd[0]:
             self.rect.centerx = 0
 
-laserImage = (pygame.image.load("laser2.png"))
-
-class LaserSprite(pygame.sprite.Sprite):
-    image = laserImage
-
-    def __init__(self, initial_pos, sd):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = initial_pos
-        self.originalImage = self.image.copy()
-        self.sd = sd
-    
-    def update(self):
-        self.rect.centerx = sd[0]/2
-        self.rect.centery = sd[1]/2
-                              
-
 boxes = RenderUpdates()
 
 bombs = RenderUpdates()
-
-ship = ShipSprite([sd[0]/2,sd[1]/2], pos, sd)
 
 for location in [[sd[0]/2, sd[1]/2]]:
    boxes.add(ship)
@@ -193,16 +179,18 @@ while True:
     if (i >= 360):
         i = 0
     bombs.update(i)
-    lasers.update()
+
     rectlist = boxes.draw(screen)
     rectlist2 = bombs.draw(screen)
-    rectlist3 = lasers.draw(screen)
+
     pygame.display.update(rectlist)
     pygame.display.update(rectlist2)
-    pygame.display.update(rectlist3)
+
     clock.tick(50)
     boxes.clear(screen, background)
     bombs.clear(screen, background)
-    lasers.clear(screen, background)
+
+
+    pygame.draw.line(screen, (255,0,0), laser_pos, (ship.getX(), ship.getY()))
 
     #pygame.display.flip()
