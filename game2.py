@@ -67,26 +67,6 @@ class touch_down(Observer):
             x = int(round(t.blobs[blobID].xpos * sd[0]))
             y = int(round(t.blobs[blobID].ypos * sd[1]))
 
-            print "shipx = ", ship.getX()
-            print "shipy = ", ship.getY()
-            print "x = ", x
-            print "y = ", y
-            d = math.sqrt(math.pow(ship.getX()-laser_pos[0],2) + math.pow(ship.getY()-laser_pos[1],2))
-            #Direction vector from laserbeam center to end
-            dx = (ship.getX() - laser_pos[0])/d
-            dy = (ship.getY() - laser_pos[1])/d
-
-            if (dx > 100):
-                if x > ship.getX():
-                    x = ship.getX() + 100
-                else:
-                    x = ship.getX() - 100
-            if (dy > 100):
-                if y > ship.getY():                
-                    y = ship.getY() + 100
-                else:
-                    y = ship.getY() - 100
-
             laser_pos[0] = x
             laser_pos[1] = y
 
@@ -235,8 +215,8 @@ while True:
             dy = (ship.getY() - laser_pos[1])/d
             #closest point to the circle center
             closestPoint = dx*(bomb.getX() - laser_pos[0]) + dy*(bomb.getY() - laser_pos[1])
-            ex = closestPoint * dx + laser_pos[0]
-            ey = closestPoint * dy + laser_pos[1]
+            ex = dx + laser_pos[0]
+            ey = dy + laser_pos[1]
             de = math.sqrt( math.pow(ex - bomb.getX(), 2) + math.pow(ey - bomb.getY(), 2) )
             #Check if the line intersects the bomb
             if (de < bomb.getR()):
