@@ -53,10 +53,11 @@ class touch_up(Observer):
     def TOUCH_UP(self,blobID, xpos, ypos):
         x = int(round(t.blobs[blobID].xpos * sd[0]))
         y = int(round(t.blobs[blobID].ypos * sd[1]))
+        global shoot_laser
         ship.MOVING = False
+        if shoot_laser == True:
+            shoot_laser = False
         pos[2] = 0
-
-
 
 class touch_down(Observer):
     def TOUCH_DOWN(self,blobID):
@@ -65,8 +66,32 @@ class touch_down(Observer):
             #Get pos of this blob
             x = int(round(t.blobs[blobID].xpos * sd[0]))
             y = int(round(t.blobs[blobID].ypos * sd[1]))
+
+            print "shipx = ", ship.getX()
+            print "shipy = ", ship.getY()
+            print "x = ", x
+            print "y = ", y
+            d = math.sqrt(math.pow(ship.getX()-laser_pos[0],2) + math.pow(ship.getY()-laser_pos[1],2))
+            #Direction vector from laserbeam center to end
+            dx = (ship.getX() - laser_pos[0])/d
+            dy = (ship.getY() - laser_pos[1])/d
+
+            if (dx > 100):
+                if x > ship.getX():
+                    x = ship.getX() + 100
+                else:
+                    x = ship.getX() - 100
+            if (dy > 100):
+                if y > ship.getY():                
+                    y = ship.getY() + 100
+                else:
+                    y = ship.getY() - 100
+
             laser_pos[0] = x
             laser_pos[1] = y
+
+            global shoot_laser
+            shoot_laser = True
 
         x = int(round(t.blobs[blobID].xpos * sd[0]))
         y = int(round(t.blobs[blobID].ypos * sd[1]))
@@ -111,6 +136,15 @@ class BombSprite(pygame.sprite.Sprite):
         if self.rect.centerx == self.sd[0]:
             self.rect.centerx = 0
 
+    def getX(self):
+        return self.rect.centerx
+
+    def getY(self):
+        return self.rect.centery
+
+    def getR(self):
+        return self.rect.w 
+
 boxes = RenderUpdates()
 
 bombs = RenderUpdates()
@@ -126,12 +160,13 @@ for y in range (0, sd[1] + 50, 50):
 screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
 background = pygame.image.load("background.jpg")
 
-screen.blit(background, (0,0))
+
 pygame.display.update()
 i=0
 while True:
     t.update()
-    #screen.fill([100,0,0])
+    #screen.fill([0,0,0])
+    screen.blit(background, (0,0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and \
                                              event.key == pygame.K_ESCAPE):
@@ -147,7 +182,6 @@ while True:
             moveVector = (pos[0]-x, pos[1]-y)
             degrees = (math.degrees(\
                     math.atan2(-1*moveVector[0], -1*moveVector[1])))
-
             ship.turn(degrees)
             ship.MOVING = True
 
@@ -186,11 +220,30 @@ while True:
     pygame.display.update(rectlist)
     pygame.display.update(rectlist2)
 
-    clock.tick(50)
-    boxes.clear(screen, background)
-    bombs.clear(screen, background)
+    clock.tick(60)
+    #boxes.clear(screen, background)
+    #bombs.clear(screen, background)
 
+    #only draw a line for 30 frames.
+    if i % 30 != 0 and shoot_laser == True:
+        pygame.draw.line(screen, (255,0,0), laser_pos, (ship.getX(), ship.getY()))
+        for bomb in bombs:
+            #Distance of the laserbeam (from ship center to line end
+            d = math.sqrt(math.pow(ship.getX()-laser_pos[0],2) + math.pow(ship.getY()-laser_pos[1],2))
+            #Direction vector from laserbeam center to end
+            dx = (ship.getX() - laser_pos[0])/d
+            dy = (ship.getY() - laser_pos[1])/d
+            #closest point to the circle center
+            closestPoint = dx*(bomb.getX() - laser_pos[0]) + dy*(bomb.getY() - laser_pos[1])
+            ex = closestPoint * dx + laser_pos[0]
+            ey = closestPoint * dy + laser_pos[1]
+            de = math.sqrt( math.pow(ex - bomb.getX(), 2) + math.pow(ey - bomb.getY(), 2) )
+            #Check if the line intersects the bomb
+            if (de < bomb.getR()):
+                bomb.kill()
 
-    pygame.draw.line(screen, (255,0,0), laser_pos, (ship.getX(), ship.getY()))
+    else:
+        global shoot_laser
+        shoot_laser = False
 
-    #pygame.display.flip()
+    pygame.display.flip()
