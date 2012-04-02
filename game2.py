@@ -204,7 +204,7 @@ while True:
     pygame.display.update(rectlist)
     pygame.display.update(rectlist2)
 
-    clock.tick(60)
+    clock.tick(50)
     #boxes.clear(screen, background)
     #bombs.clear(screen, background)
     
@@ -224,10 +224,20 @@ while True:
             i = b * b - 4.0 * a * c
             if i < 0.0:
                 pass #no intersections
-            #TODO: Check to see if the laser beam line ends before the bomb.
-            #check bomb and laser's x and y coords
             elif i > 0:
-                bomb.kill()
+            #There is an intersection
+                #Make sure that the laser beam does not end before the bomb...
+                if laser_pos[0] < bomb.getX() and ship.getX() < bomb.getX():
+                    pass
+                elif laser_pos[1] < bomb.getY() and ship.getY() < bomb.getY():
+                    pass
+                elif laser_pos[0] > bomb.getX() and ship.getX() > bomb.getX():
+                    pass
+                elif laser_pos[1] > bomb.getY() and ship.getY() > bomb.getY():
+                    pass
+                else:
+                    #the laser beam cuts across the bomb, destroy it.
+                    bomb.kill()
     else:
         shoot_laser = False
 
