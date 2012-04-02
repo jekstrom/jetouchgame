@@ -224,6 +224,8 @@ while True:
             i = b * b - 4.0 * a * c
             if i < 0.0:
                 pass #no intersections
+            #TODO: Check to see if the laser beam line ends before the bomb.
+            #check bomb and laser's x and y coords
             elif i > 0:
                 bomb.kill()
     else:
