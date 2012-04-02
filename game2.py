@@ -75,10 +75,11 @@ class touch_down(Observer):
             global shoot_laser
             shoot_laser = True
             global clock_s
-            clock_s = time.time() + 1
+            clock_s = time.time() + .5
+            pos[2] = 0
 
-        x = int(round(t.blobs[blobID].xpos * sd[0]))
-        y = int(round(t.blobs[blobID].ypos * sd[1]))
+        #x = int(round(t.blobs[blobID].xpos * sd[0]))
+        #y = int(round(t.blobs[blobID].ypos * sd[1]))
         pos[2] = 1
 
 class touch_move(Observer):
@@ -209,7 +210,7 @@ while True:
     #bombs.clear(screen, background)
     
     if shoot_laser == True and clock_s >= time.time() and clock_s != 0:
-        pygame.draw.line(screen, (255,0,0), laser_pos, (ship.getX(), ship.getY()))
+        pygame.draw.line(screen, (0,200,0), laser_pos, (ship.getX(), ship.getY()))
         for bomb in bombs:
             #Distance of the laserbeam (from ship center to line end
             #d = math.sqrt(math.pow(ship.getX()-laser_pos[0],2) + math.pow(ship.getY()-laser_pos[1],2))
