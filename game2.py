@@ -1,5 +1,6 @@
 #!/usr/bin/evn python
 import sys
+import time
 
 from touch import *
 import pygame
@@ -13,7 +14,7 @@ from animatedshipsprite import *
 sd = (800, 600)
 
 clock = pygame.time.Clock()
-
+clock_s = 0
 #Set up touchpy stuff
 t = touchpy()
 
@@ -57,6 +58,7 @@ class touch_up(Observer):
         ship.MOVING = False
         if shoot_laser == True:
             shoot_laser = False
+            #clock_s = 0
         pos[2] = 0
 
 class touch_down(Observer):
@@ -72,6 +74,8 @@ class touch_down(Observer):
 
             global shoot_laser
             shoot_laser = True
+            global clock_s
+            clock_s = time.time() + 1
 
         x = int(round(t.blobs[blobID].xpos * sd[0]))
         y = int(round(t.blobs[blobID].ypos * sd[1]))
@@ -111,8 +115,8 @@ class BombSprite(pygame.sprite.Sprite):
     
     def update(self, rotation):
         self.rect.centerx += 1
-        self.image = pygame.transform.rotate(self.originalImage, rotation)
-        self.rect.size = self.image.get_rect().size
+        #self.image = pygame.transform.rotate(self.originalImage, rotation)
+        #self.rect.size = self.image.get_rect().size
         if self.rect.centerx == self.sd[0]:
             self.rect.centerx = 0
 
@@ -190,7 +194,7 @@ while True:
 
     boxes.update(pygame.time.get_ticks(), pos)
     i += 1
-    if (i >= 360):
+    if i > 60:
         i = 0
     bombs.update(i)
 
@@ -203,27 +207,26 @@ while True:
     clock.tick(60)
     #boxes.clear(screen, background)
     #bombs.clear(screen, background)
-
-    #only draw a line for 30 frames.
-    if i % 30 != 0 and shoot_laser == True:
+    
+    if shoot_laser == True and clock_s >= time.time() and clock_s != 0:
         pygame.draw.line(screen, (255,0,0), laser_pos, (ship.getX(), ship.getY()))
         for bomb in bombs:
             #Distance of the laserbeam (from ship center to line end
-            d = math.sqrt(math.pow(ship.getX()-laser_pos[0],2) + math.pow(ship.getY()-laser_pos[1],2))
-            #Direction vector from laserbeam center to end
-            dx = (ship.getX() - laser_pos[0])/d
-            dy = (ship.getY() - laser_pos[1])/d
-            #closest point to the circle center
-            closestPoint = dx*(bomb.getX() - laser_pos[0]) + dy*(bomb.getY() - laser_pos[1])
-            ex = dx + laser_pos[0]
-            ey = dy + laser_pos[1]
-            de = math.sqrt( math.pow(ex - bomb.getX(), 2) + math.pow(ey - bomb.getY(), 2) )
-            #Check if the line intersects the bomb
-            if (de < bomb.getR()):
-                bomb.kill()
+            #d = math.sqrt(math.pow(ship.getX()-laser_pos[0],2) + math.pow(ship.getY()-laser_pos[1],2))
+            a = math.pow(ship.getX() - laser_pos[0],2) + math.pow(ship.getY() - laser_pos[1],2)
+            b = 2 * ((ship.getX() - laser_pos[0]) * (laser_pos[0] - bomb.getX()) +\
+                         (ship.getY() - laser_pos[1]) * (laser_pos[1] - bomb.getY()))
 
+            c = (math.pow(bomb.getX(),2) + math.pow(bomb.getY(),2) + math.pow(laser_pos[0],2) +\
+                     math.pow(laser_pos[1],2) - 2 * (bomb.getX() * laser_pos[0] + bomb.getY() * laser_pos[1]) -\
+                     math.pow(bomb.getR(),2))
+
+            i = b * b - 4.0 * a * c
+            if i < 0.0:
+                pass #no intersections
+            elif i > 0:
+                bomb.kill()
     else:
-        global shoot_laser
         shoot_laser = False
 
     pygame.display.flip()
