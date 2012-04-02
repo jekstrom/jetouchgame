@@ -4,7 +4,7 @@ import time
 
 from touch import *
 import pygame
-from pygame.locals import KEYDOWN
+from pygame.locals import *
 import utils
 from dirty import *
 from oru import *
@@ -28,7 +28,8 @@ pos = [0, 0, 0]
 size = 100
 blist = []
 
-mouseO = [0, 0, 0]
+#player score
+score = 0
 
 images = (pygame.image.load("spaceship1.png"), pygame.image.load("spaceship2.png"), pygame.image.load("spaceship3.png"))
 
@@ -120,6 +121,10 @@ class BombSprite(pygame.sprite.Sprite):
         #self.rect.size = self.image.get_rect().size
         if self.rect.centerx == self.sd[0]:
             self.rect.centerx = 0
+            
+        #See if a bomb collides with the ship.
+        if self.rect.colliderect(ship.rect):
+            ship.kill()
 
     def getX(self):
         return self.rect.centerx
@@ -145,53 +150,18 @@ for y in range (0, sd[1] + 50, 50):
 screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
 background = pygame.image.load("background.jpg")
 
-
 pygame.display.update()
 i=0
 while True:
     t.update()
+
     #screen.fill([0,0,0])
     screen.blit(background, (0,0))
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and \
                                              event.key == pygame.K_ESCAPE):
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pos[2] = 1
-            pos[0] = event.pos[0]
-            pos[1] = event.pos[1]
-
-            x = ship.rect.centerx
-            y = ship.rect.centery
-
-            moveVector = (pos[0]-x, pos[1]-y)
-            degrees = (math.degrees(\
-                    math.atan2(-1*moveVector[0], -1*moveVector[1])))
-            ship.turn(degrees)
-            ship.MOVING = True
-
-        if event.type == pygame.MOUSEBUTTONUP:
-            pos[2] = 0
-            ship.MOVING = False
-
-        elif event.type == pygame.MOUSEMOTION and pos[2] == 1:
-            pos[0] = event.pos[0]
-            pos[1] = event.pos[1]
-
-            x = ship.rect.centerx
-            y = ship.rect.centery
-
-            moveVector = (pos[0]-x, pos[1]-y)
-            degrees = (math.degrees(\
-                    math.atan2(-1*moveVector[0], -1*moveVector[1])))
-
-            ship.turn(degrees)            
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                ship.turn(10)
-            elif event.key == pygame.K_RIGHT:
-                ship.turn(-10)
+            sys.exit()          
 
     boxes.update(pygame.time.get_ticks(), pos)
     i += 1
@@ -199,15 +169,15 @@ while True:
         i = 0
     bombs.update(i)
 
+    clock.tick(50)
+    #boxes.clear(screen, background)
+    #bombs.clear(screen, background)
+
     rectlist = boxes.draw(screen)
     rectlist2 = bombs.draw(screen)
 
     pygame.display.update(rectlist)
     pygame.display.update(rectlist2)
-
-    clock.tick(50)
-    #boxes.clear(screen, background)
-    #bombs.clear(screen, background)
     
     if shoot_laser == True and clock_s >= time.time() and clock_s != 0:
         pygame.draw.line(screen, (0,200,0), laser_pos, (ship.getX(), ship.getY()))
@@ -239,7 +209,18 @@ while True:
                 else:
                     #the laser beam cuts across the bomb, destroy it.
                     bomb.kill()
+                    score += 1
     else:
         shoot_laser = False
+
+    #render score
+     if pygame.font:
+        font = pygame.font.Font(None,36)
+        text = font.render("Score: ", 1, (0,0,255))
+        global score
+        textScore = font.render(str(score), 1, (0,0,255))
+        pygame.draw.rect(background, (0,0,0), (text.get_rect().top, 0, text.get_rect().centerx + 75, 30))
+        screen.blit(text, (0,0))
+        screen.blit(textScore, (text.get_rect().centerx + 50, 0))
 
     pygame.display.flip()
