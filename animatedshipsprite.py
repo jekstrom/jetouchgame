@@ -58,3 +58,9 @@ class AnimatedShipSprite(pygame.sprite.Sprite):
                     
     def turn(self, amt):
         self.rotation = amt
+
+    def getX(self):
+        return self.rect.centerx
+
+    def getY(self):
+        return self.rect.centery
