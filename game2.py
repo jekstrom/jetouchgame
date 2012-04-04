@@ -6,15 +6,17 @@ from touch import *
 import pygame
 from pygame.locals import *
 import utils
-from dirty import *
-from oru import *
+
 from animatedshipsprite import *
+from bombsprite import *
+from shipsprite import *
 
 #Screen dimensions
 sd = (800, 600)
 
 clock = pygame.time.Clock()
 clock_s = 0
+
 #Set up touchpy stuff
 t = touchpy()
 
@@ -31,18 +33,7 @@ blist = []
 #player score
 score = 0
 
-images = (pygame.image.load("spaceship1.png"), pygame.image.load("spaceship2.png"), pygame.image.load("spaceship3.png"))
-
-class ShipSprite(AnimatedShipSprite, pygame.sprite.Sprite):
-    image = None
-
-    def __init__(self, initial_pos, mouse, sd):
-        AnimatedShipSprite.__init__(self, images, pos)
-
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = initial_pos
-
-ship = ShipSprite([sd[0]/2,sd[1]/2], pos, sd)
+ship = ShipSprite([sd[0]/2,sd[1]/2], pos)
 
 class Observer(object):
     def __init__(self, subject):
@@ -102,38 +93,20 @@ tu = touch_up(t)
 td = touch_down(t)
 tm = touch_move(t)
        
-bombImage = (pygame.image.load("bomb.png"))
-
-class BombSprite(pygame.sprite.Sprite):
-    image = bombImage
-    
-    def __init__(self, initial_pos, sd):
-        pygame.sprite.Sprite.__init__(self)
-
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = initial_pos
-        self.originalImage = self.image.copy()
-        self.sd = sd
-    
-    def update(self, rotation):
-        self.rect.centerx += 1
-        #self.image = pygame.transform.rotate(self.originalImage, rotation)
-        #self.rect.size = self.image.get_rect().size
-        if self.rect.centerx == self.sd[0]:
-            self.rect.centerx = 0
-            
-        #See if a bomb collides with the ship.
-        if self.rect.colliderect(ship.rect):
-            ship.kill()
-
-    def getX(self):
-        return self.rect.centerx
-
-    def getY(self):
-        return self.rect.centery
-
-    def getR(self):
-        return self.rect.w 
+def endGame():
+    if pygame.font:
+        font = pygame.font.Font(None,50)
+        gameOver = font.render("GAME OVER", 1, (255,0,0))
+        font = pygame.font.Font(None, 36)
+        scoreText = font.render("Score: ", 1, (255,0,0))
+        global score
+        scorePoints = font.render(str(score), 1, (255,0,0))
+        pygame.draw.rect(background, (0,0,0), (text.get_rect().top, 0, text.get_rect().centerx + 75, 30))
+        screen.blit(gameOver, (sd[0]/2 - gameOver.get_rect().centerx, sd[1]/2))
+        screen.blit(scoreText, (sd[0]/2 - scoreText.get_rect().centerx, sd[1]/2 + 55))
+        screen.blit(scorePoints, (sd[0]/2 - scorePoints.get_rect().centerx + 55, sd[1]/2 + 55))
+    for bomb in bombs:
+        bomb.kill()
 
 boxes = RenderUpdates()
 
@@ -163,11 +136,11 @@ while True:
                                              event.key == pygame.K_ESCAPE):
             sys.exit()          
 
+    if len(boxes) == 0:
+        endGame()
+
     boxes.update(pygame.time.get_ticks(), pos)
-    i += 1
-    if i > 60:
-        i = 0
-    bombs.update(i)
+    bombs.update(ship)
 
     clock.tick(50)
     #boxes.clear(screen, background)
@@ -179,7 +152,7 @@ while True:
     pygame.display.update(rectlist)
     pygame.display.update(rectlist2)
     
-    if shoot_laser == True and clock_s >= time.time() and clock_s != 0:
+    if shoot_laser == True and clock_s >= time.time() and clock_s != 0 and len(boxes) != 0:
         pygame.draw.line(screen, (0,200,0), laser_pos, (ship.getX(), ship.getY()))
         for bomb in bombs:
             #Distance of the laserbeam (from ship center to line end
@@ -214,7 +187,7 @@ while True:
         shoot_laser = False
 
     #render score
-     if pygame.font:
+    if pygame.font:
         font = pygame.font.Font(None,36)
         text = font.render("Score: ", 1, (0,0,255))
         global score
@@ -222,5 +195,7 @@ while True:
         pygame.draw.rect(background, (0,0,0), (text.get_rect().top, 0, text.get_rect().centerx + 75, 30))
         screen.blit(text, (0,0))
         screen.blit(textScore, (text.get_rect().centerx + 50, 0))
+
+     
 
     pygame.display.flip()
