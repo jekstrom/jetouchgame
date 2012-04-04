@@ -1,12 +1,9 @@
 import sys
-import time
 
 from touch import *
 import pygame
 from pygame.locals import *
-import utils
-from dirty import *
-from oru import *
+
 from animatedshipsprite import *
 
 images = (pygame.image.load("spaceship1.png"), pygame.image.load("spaceship2.png"), pygame.image.load("spaceship3.png"))
