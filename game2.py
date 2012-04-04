@@ -129,7 +129,7 @@ def displayMenu():
             font = pygame.font.Font(None,50)
             title = font.render("Space game", 1, (250,250,250))
             screen.blit(title, (sd[0]/2 - title.get_rect().centerx, sd[1]/2))
-            
+            newGameButton = Button()
 
         pygame.display.flip()
 
