@@ -27,7 +27,8 @@ pygame.init()
 sz = utils.get_sz()
 
 #keeps track of mouse or blob coordinates (x and y) and whether a blob has been touched down or the mouse1 has been pressed
-pos = [0, 0, 0]
+#pos[3] is set to 1 if moving
+pos = [0, 0, 0, 0]
 size = 100
 blist = []
 
@@ -53,6 +54,7 @@ class touch_up(Observer):
             shoot_laser = False
             #clock_s = 0
         pos[2] = 0
+        pos[3] = 0
 
 class touch_down(Observer):
     def TOUCH_DOWN(self,blobID):
@@ -74,6 +76,7 @@ class touch_down(Observer):
         #x = int(round(t.blobs[blobID].xpos * sd[0]))
         #y = int(round(t.blobs[blobID].ypos * sd[1]))
         pos[2] = 1
+        pos[3] = 0
 
 class touch_move(Observer):
     def TOUCH_MOVE(self,blobID):
@@ -89,7 +92,7 @@ class touch_move(Observer):
         #boxes.update(pygame.time.get_ticks(), (posx, posy))
         pos[0] = posx
         pos[1] = posy
-        pos[2] = 2 #moving
+        pos[3] = 1 #moving
 
 tu = touch_up(t)
 td = touch_down(t)
@@ -99,19 +102,23 @@ screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
 background = pygame.image.load('background.jpg')
 
 def endGame(bombs):
-    if pygame.font:
-        font = pygame.font.Font(None,50)
-        gameOver = font.render("GAME OVER", 1, (255,0,0))
-        font = pygame.font.Font(None, 36)
-        scoreText = font.render("Score: ", 1, (255,0,0))
-        global score
-        scorePoints = font.render(str(score), 1, (255,0,0))
-        pygame.draw.rect(background, (0,0,0), (scoreText.get_rect().top, 0, scoreText.get_rect().centerx + 75, 30))
-        screen.blit(gameOver, (sd[0]/2 - gameOver.get_rect().centerx, sd[1]/2))
-        screen.blit(scoreText, (sd[0]/2 - scoreText.get_rect().centerx, sd[1]/2 + 55))
-        screen.blit(scorePoints, (sd[0]/2 - scorePoints.get_rect().centerx + 55, sd[1]/2 + 55))
     for bomb in bombs:
         bomb.kill()
+    global clock_s
+    if time.time() < clock_s:
+        if pygame.font:
+            font = pygame.font.Font(None,50)
+            gameOver = font.render("GAME OVER", 1, (255,0,0))
+            font = pygame.font.Font(None, 36)
+            scoreText = font.render("Score: ", 1, (255,0,0))
+            global score
+            scorePoints = font.render(str(score), 1, (255,0,0))
+            pygame.draw.rect(background, (0,0,0), (scoreText.get_rect().top, 0, scoreText.get_rect().centerx + 75, 30))
+            screen.blit(gameOver, (sd[0]/2 - gameOver.get_rect().centerx, sd[1]/2))
+            screen.blit(scoreText, (sd[0]/2 - scoreText.get_rect().centerx, sd[1]/2 + 55))
+            screen.blit(scorePoints, (sd[0]/2 - scorePoints.get_rect().centerx + 55, sd[1]/2 + 55))
+    elif time.time() >= clock_s:
+        displayMenu()
 
 def displayMenu():
     screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
@@ -147,6 +154,7 @@ def displayMenu():
             if newGameButton.update(pos):
                 startGame()
             elif quitGameButton.update(pos):
+                print "exiting"
                 sys.exit()
 
         pygame.display.flip()
@@ -181,7 +189,10 @@ def startGame():
                 
         #No more ships exist
         if len(boxes) == 0:
+            global clock_s
+            clock_s = time.time() + 10
             endGame(bombs)
+            break
                     
         boxes.update(pygame.time.get_ticks(), pos)
         bombs.update(ship)
