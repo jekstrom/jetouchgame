@@ -14,7 +14,8 @@ from shipsprite import *
 from buttonsprite import *
 
 #Screen dimensions
-sd = (800, 600)
+sz = utils.get_sz()
+sd = (sz[0], sz[1])
 
 clock = pygame.time.Clock()
 clock_s = 0
@@ -25,13 +26,14 @@ t = touchpy()
 #Initialize pygame
 pygame.init()
 
-sz = utils.get_sz()
-
 #keeps track of mouse or blob coordinates (x and y) and whether a blob has been touched down or the mouse1 has been pressed
 #pos[3] is set to 1 if moving
 pos = [0, 0, 0, 0]
 size = 100
 blist = []
+
+screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
+bkgImage = pygame.Surface.convert(pygame.image.load("background2.jpg"))
 
 #player score
 score = 0
@@ -100,7 +102,8 @@ td = touch_down(t)
 tm = touch_move(t)
        
 screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
-background = pygame.image.load('background.jpg')
+#background = pygame.image.load('background2.jpg')
+background = bkgImage
 
 def endGame(bombs):
     for bomb in bombs:
@@ -123,7 +126,8 @@ def endGame(bombs):
 
 def displayMenu():
     screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
-    background = pygame.image.load("background.jpg")
+    #background = pygame.image.load("background2.jpg")
+    background = pygame.Surface.convert(bkgImage)
 
     newGameButton = Button("newGame1.png", "newGame2.png")
     newGameButton.setCoords((sd[0]/2 - newGameButton.rect.centerx, sd[1]/2 + 50))
@@ -184,7 +188,7 @@ def startGame():
             bombs.add(bomb)
 
     screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
-    background = pygame.image.load("background.jpg")
+    background = pygame.Surface.convert(bkgImage)
 
     #Start main loop
     pygame.display.update()
@@ -201,7 +205,7 @@ def startGame():
         #No more ships exist
         if len(boxes) == 0:
             global clock_s
-            clock_s = time.time() + 10
+            clock_s = time.time() + 5
             endGame(bombs)
             break
 
@@ -213,7 +217,7 @@ def startGame():
         boxes.update(pygame.time.get_ticks(), pos)
         bombs.update(ship)
         
-        clock.tick(50)
+        clock.tick(30)
         #boxes.clear(screen, background)
         #bombs.clear(screen, background)
 
@@ -267,7 +271,7 @@ def startGame():
             textScore = font.render(str(score), 1, (0,0,255))
             pygame.draw.rect(background, (0,0,0), (text.get_rect().top, 0, text.get_rect().centerx + 75, 30))
             screen.blit(text, (0,0))
-            screen.blit(textScore, (text.get_rect().centerx + 50, 0))        
+            screen.blit(textScore, (text.get_rect().centerx + 50, 0))    
 
         pygame.display.flip()
     
