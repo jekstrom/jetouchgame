@@ -10,6 +10,7 @@ import utils
 from animatedshipsprite import *
 from bombsprite import *
 from shipsprite import *
+from buttonsprite import *
 
 #Screen dimensions
 sd = (800, 600)
@@ -88,13 +89,14 @@ class touch_move(Observer):
         #boxes.update(pygame.time.get_ticks(), (posx, posy))
         pos[0] = posx
         pos[1] = posy
+        pos[2] = 2 #moving
 
 tu = touch_up(t)
 td = touch_down(t)
 tm = touch_move(t)
        
 screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
-background = pygame.image.load("background.jpg")
+background = pygame.image.load('background.jpg')
 
 def endGame(bombs):
     if pygame.font:
@@ -115,7 +117,18 @@ def displayMenu():
     screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
     background = pygame.image.load("background.jpg")
 
+    newGameButton = Button("newGame1.png", "newGame2.png")
+    newGameButton.setCoords((sd[0]/2 - newGameButton.rect.centerx, sd[1]/2 + 50))
+
+    quitGameButton = Button("quitGame1.png", "quitGame2.png")
+    quitGameButton.setCoords((sd[0]/2 - quitGameButton.rect.centerx, sd[1]/2 + 150))
+
+    newGameButtonGroup = RenderUpdates()
+    newGameButtonGroup.add(newGameButton)
+    newGameButtonGroup.add(quitGameButton)
+
     pygame.display.update()
+    #display menu
     while True:
         t.update()
         screen.blit(background, (0,0))
@@ -129,7 +142,9 @@ def displayMenu():
             font = pygame.font.Font(None,50)
             title = font.render("Space game", 1, (250,250,250))
             screen.blit(title, (sd[0]/2 - title.get_rect().centerx, sd[1]/2))
-            newGameButton = Button()
+
+            newGameButtonGroup.draw(screen)
+            newGameButtonGroup.update(pos)
 
         pygame.display.flip()
 
