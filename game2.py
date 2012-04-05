@@ -1,6 +1,7 @@
 #!/usr/bin/evn python
 import sys
 import time
+import random
 
 from touch import *
 import pygame
@@ -73,8 +74,8 @@ class touch_down(Observer):
             clock_s = time.time() + .5
             pos[2] = 0
 
-        #x = int(round(t.blobs[blobID].xpos * sd[0]))
-        #y = int(round(t.blobs[blobID].ypos * sd[1]))
+        x = int(round(t.blobs[blobID].xpos * sd[0]))
+        y = int(round(t.blobs[blobID].ypos * sd[1]))
         pos[2] = 1
         pos[3] = 0
 
@@ -105,7 +106,7 @@ def endGame(bombs):
     for bomb in bombs:
         bomb.kill()
     global clock_s
-    if time.time() < clock_s:
+    while time.time() < clock_s:
         if pygame.font:
             font = pygame.font.Font(None,50)
             gameOver = font.render("GAME OVER", 1, (255,0,0))
@@ -117,8 +118,8 @@ def endGame(bombs):
             screen.blit(gameOver, (sd[0]/2 - gameOver.get_rect().centerx, sd[1]/2))
             screen.blit(scoreText, (sd[0]/2 - scoreText.get_rect().centerx, sd[1]/2 + 55))
             screen.blit(scorePoints, (sd[0]/2 - scorePoints.get_rect().centerx + 55, sd[1]/2 + 55))
-    elif time.time() >= clock_s:
-        displayMenu()
+        pygame.display.flip()
+    displayMenu()
 
 def displayMenu():
     screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
@@ -159,17 +160,27 @@ def displayMenu():
 
         pygame.display.flip()
 
+def addBombs(bombs, score):
+    for numBombs in range (0, score + 5):
+        randx = random.randint(0, sd[0])
+        randy = random.randint(0, sd[1])
+        location = (randx, randy)
+        bomb = BombSprite(location, sd, (1, 8))
+        bombs.add(bomb)
+
 def startGame():
+    global score
+    score = 0
     boxes = RenderUpdates()
     bombs = RenderUpdates()
     
     for location in [[sd[0]/2, sd[1]/2]]:
         boxes.add(ship)
-        
-    #TODO: Randomize adding of bombs
+    
+    #Wave 1
     for y in range (0, sd[1] + 50, 50):
         for location in [[0, y]]:
-            bomb = BombSprite(location, sd)
+            bomb = BombSprite(location, sd, (2,4))
             bombs.add(bomb)
 
     screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
@@ -193,6 +204,11 @@ def startGame():
             clock_s = time.time() + 10
             endGame(bombs)
             break
+
+        #Next wave of bombs
+        if len(bombs) <= 2:
+            global score
+            addBombs(bombs, score)
                     
         boxes.update(pygame.time.get_ticks(), pos)
         bombs.update(ship)
