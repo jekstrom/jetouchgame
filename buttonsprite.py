@@ -45,6 +45,8 @@ class Button(pygame.sprite.Sprite):
 
         if self.clock_d - self.clock_u < 1.0 and buttonClicked and pos[2] != 2:
             #the button was pressed
-            print "The button was pressed"
+            return True
+        else:
+            return False
 
     

@@ -144,7 +144,10 @@ def displayMenu():
             screen.blit(title, (sd[0]/2 - title.get_rect().centerx, sd[1]/2))
 
             newGameButtonGroup.draw(screen)
-            newGameButtonGroup.update(pos)
+            if newGameButton.update(pos):
+                startGame()
+            elif quitGameButton.update(pos):
+                sys.exit()
 
         pygame.display.flip()
 
