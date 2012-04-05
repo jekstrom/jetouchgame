@@ -43,7 +43,7 @@ class Button(pygame.sprite.Sprite):
             self.image = self._images[0]
             self.clock_u = time.time()
 
-        if self.clock_d - self.clock_u < 1.0 and buttonClicked and pos[2] != 2:
+        if self.clock_d - self.clock_u < 1.0 and buttonClicked and pos[3] != 1:
             #the button was pressed
             return True
         else:

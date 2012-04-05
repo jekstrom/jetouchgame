@@ -8,8 +8,6 @@ import pygame
 from pygame.locals import *
 import utils
 from dirty import *
-from oru import *
-from animatedshipsprite import *
 
 bombImage = (pygame.image.load("bomb.png"))
 
@@ -51,13 +49,13 @@ class BombSprite(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.dx, self.dy)
         #self.image = pygame.transform.rotate(self.originalImage, rotation)
         #self.rect.size = self.image.get_rect().size
-        if self.rect.centerx >= self.sd[0]:
+        if self.rect.right >= self.sd[0]:
             self.dx *= -1
-        elif self.rect.centerx <= 0:
+        elif self.rect.left <= 0:
             self.dx *= -1
-        elif self.rect.centery >= self.sd[1]:
+        elif self.rect.bottom >= self.sd[1]:
             self.dy *= -1
-        elif self.rect.centery <= 0:
+        elif self.rect.top <= 0:
             self.dy *= -1
             
         #See if a bomb collides with the ship.

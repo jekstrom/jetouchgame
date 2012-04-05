@@ -33,7 +33,7 @@ size = 100
 blist = []
 
 screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
-bkgImage = pygame.Surface.convert(pygame.image.load("background2.jpg"))
+bkgImage = pygame.Surface.convert(pygame.image.load("background3.bmp"))
 
 #player score
 score = 0
@@ -183,12 +183,17 @@ def startGame():
     
     #Wave 1
     for y in range (0, sd[1] + 50, 50):
-        for location in [[0, y]]:
+        for location in [[10, y]]:
             bomb = BombSprite(location, sd, (2,4))
             bombs.add(bomb)
 
-    screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
+    screen = pygame.display.set_mode(sd, pygame.DOUBLEBUF)
     background = pygame.Surface.convert(bkgImage)
+
+    font = pygame.font.Font(None,36)
+    global score
+    scoreText = font.render("Score: ", 1, (0,0,255))
+    scoreAmtText = font.render(str(score), 1, (0,0,255))
 
     #Start main loop
     pygame.display.update()
@@ -217,15 +222,15 @@ def startGame():
         boxes.update(pygame.time.get_ticks(), pos)
         bombs.update(ship)
         
-        clock.tick(30)
+        clock.tick(40)
         #boxes.clear(screen, background)
         #bombs.clear(screen, background)
 
         rectlist = boxes.draw(screen)
         rectlist2 = bombs.draw(screen)
 
-        pygame.display.update(rectlist)
-        pygame.display.update(rectlist2)
+        #pygame.display.update(rectlist)
+        #pygame.display.update(rectlist2)
         
         #Handle laser beam collisions
         global shoot_laser
@@ -260,18 +265,16 @@ def startGame():
                         #the laser beam cuts across the bomb, destroy it.
                         bomb.kill()
                         score += 1
+                        global score
+                        scoreAmtText = font.render(str(score), 1, (0,0,255))
         else:
             shoot_laser = False
 
         #render score
-        if pygame.font:
-            font = pygame.font.Font(None,36)
-            text = font.render("Score: ", 1, (0,0,255))
-            global score
-            textScore = font.render(str(score), 1, (0,0,255))
-            pygame.draw.rect(background, (0,0,0), (text.get_rect().top, 0, text.get_rect().centerx + 75, 30))
-            screen.blit(text, (0,0))
-            screen.blit(textScore, (text.get_rect().centerx + 50, 0))    
+        if pygame.font:        
+            pygame.draw.rect(background, (0,0,0), (scoreText.get_rect().top, 0, scoreText.get_rect().centerx + 75, 30))
+            screen.blit(scoreText, (0,0))
+            screen.blit(scoreAmtText, (scoreText.get_rect().centerx + 50, 0))    
 
         pygame.display.flip()
     
