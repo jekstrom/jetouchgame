@@ -32,7 +32,7 @@ pos = [0, 0, 0, 0]
 size = 100
 blist = []
 
-screen = pygame.display.set_mode(sd, pygame.HWSURFACE)
+screen = pygame.display.set_mode(sd, pygame.DOUBLEBUF)
 bkgImage = pygame.Surface.convert(pygame.image.load("background3.bmp"))
 
 #player score
@@ -175,6 +175,7 @@ def addBombs(bombs, score):
 def startGame():
     global score
     score = 0
+    ship.setPos((sd[0]/2, sd[1]/2))
     boxes = RenderUpdates()
     bombs = RenderUpdates()
     
