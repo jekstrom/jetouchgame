@@ -64,3 +64,7 @@ class AnimatedShipSprite(pygame.sprite.Sprite):
 
     def getY(self):
         return self.rect.centery
+
+    def setPos(self, pos):
+        self.rect.centerx = pos[0]
+        self.rect.centery = pos[1]
